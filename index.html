@@ -10,14 +10,16 @@
       background: url('bg.png') no-repeat center center fixed;
       background-size: cover;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
       color: #fff;
     }
     .bitkub-logo {
       margin-top: 30px;
       height: 60px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
     }
     header {
       color: white;
@@ -27,25 +29,12 @@
       text-shadow: 0 0 10px #00b140;
       text-align: center;
     }
-    .container {
-      display: flex;
-      justify-content: space-between;
-      padding: 40px;
-      gap: 20px;
-    }
-    .sidebar {
-      width: 20%;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 0 20px rgba(0,255,120,0.2);
-    }
     .dashboard {
-      flex-grow: 1;
       display: flex;
+      gap: 40px;
+      margin: 60px 20px 20px;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 30px;
     }
     .card {
       background: #1c1c1cdd;
@@ -55,6 +44,10 @@
       width: 280px;
       text-align: center;
       transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 40px rgba(0,255,120,0.4);
     }
     .logo {
       height: 60px;
@@ -69,72 +62,35 @@
     .price {
       font-size: 2em;
       font-weight: bold;
+      color: #ffffff;
     }
     .change {
       font-size: 1.2em;
       margin-top: 10px;
       font-weight: 600;
     }
-    .positive { color: #00e676; }
-    .negative { color: #ff5252; }
+    .positive {
+      color: #00e676;
+    }
+    .negative {
+      color: #ff5252;
+    }
     footer {
-      margin-top: 20px;
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
       text-align: center;
-      color: #ccc;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 15px;
+      padding: 10px;
+      color: #888;
       font-size: 0.9em;
-    }
-    .list-title {
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #00b140;
-    }
-    .list-item {
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-    }
-    .list-item img {
-      height: 24px;
-      margin-right: 10px;
-      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.4);
     }
   </style>
 </head>
 <body>
   <img src="bitkub-logo.png" alt="Bitkub Exchange Logo" class="bitkub-logo">
   <header>Real-Time Crypto Prices</header>
-  <div class="container">
-    <div class="sidebar">
-      <div class="list-title">Top 10 by Volume</div>
-      <div id="top-volume"></div>
-    </div>
-    <div class="dashboard">
-      <div class="card">
-        <img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png" alt="BTC Logo" class="logo">
-        <div class="coin-name">Bitcoin (BTC)</div>
-        <div class="price" id="btc-price">Loading...</div>
-        <div class="change" id="btc-change">-</div>
-      </div>
-      <div class="card">
-        <img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png" alt="ETH Logo" class="logo">
-        <div class="coin-name">Ethereum (ETH)</div>
-        <div class="price" id="eth-price">Loading...</div>
-        <div class="change" id="eth-change">-</div>
-      </div>
-      <div class="card">
-        <img src="zrc-logo.png" alt="ZRC Logo (Zircuit)" class="logo">
-        <div class="coin-name">Zircuit (ZRC)</div>
-        <div class="price" id="zrc-price">Loading...</div>
-        <div class="change" id="zrc-change">-</div>
-      </div>
-    </div>
-    <div class="sidebar">
-      <div class="list-title">Top 10 Gainers</div>
-      <div id="top-gainers"></div>
-    </div>
-  </div>
+  <div class="dashboard" id="dashboard"></div>
   <footer>
     <div style="margin-bottom: 8px;">
       Cryptocurrency and digital tokens involve high risks; investors may lose all investment money and should study information carefully and make investments according to their own risk profile.
@@ -142,55 +98,56 @@
     Powered by Bitkub API · Updates every 10 sec
   </footer>
   <script>
-    async function fetchSingleCoin(sym) {
-      const res = await fetch(`https://api.bitkub.com/api/v3/market/ticker?sym=${sym}`);
-      const json = await res.json();
-      return Object.values(json)[0];
-    }
+    const coinList = {
+      BTC: { name: "Bitcoin", logo: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png" },
+      ETH: { name: "Ethereum", logo: "https://assets.coingecko.com/coins/images/279/large/ethereum.png" },
+      ZRC: { name: "Zircuit", logo: "zrc-logo.png" },
+      USDT: { name: "Tether", logo: "https://assets.coingecko.com/coins/images/325/large/Tether-logo.png" },
+      BNB: { name: "BNB", logo: "https://assets.coingecko.com/coins/images/825/large/bnb.png" },
+      XRP: { name: "XRP", logo: "https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png" },
+      ADA: { name: "Cardano", logo: "https://assets.coingecko.com/coins/images/975/large/cardano.png" },
+      DOGE: { name: "Dogecoin", logo: "https://assets.coingecko.com/coins/images/5/large/dogecoin.png" },
+      SOL: { name: "Solana", logo: "https://assets.coingecko.com/coins/images/4128/large/Solana.jpg" },
+      AVAX: { name: "Avalanche", logo: "https://assets.coingecko.com/coins/images/12559/large/coin-round-red.png" },
+      LTC: { name: "Litecoin", logo: "https://assets.coingecko.com/coins/images/2/large/litecoin.png" },
+      MATIC: { name: "Polygon", logo: "https://assets.coingecko.com/coins/images/4713/large/matic-token-icon.png" },
+      LINK: { name: "Chainlink", logo: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png" },
+      ATOM: { name: "Cosmos", logo: "https://assets.coingecko.com/coins/images/1481/large/cosmos_hub.png" },
+      XLM: { name: "Stellar", logo: "https://assets.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png" },
+      DOT: { name: "Polkadot", logo: "https://assets.coingecko.com/coins/images/12171/large/polkadot.png" },
+      AAVE: { name: "Aave", logo: "https://assets.coingecko.com/coins/images/12645/large/AAVE.png" },
+      UNI: { name: "Uniswap", logo: "https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png" },
+      TRX: { name: "TRON", logo: "https://assets.coingecko.com/coins/images/1094/large/tron-logo.png" },
+      NEAR: { name: "Near", logo: "https://assets.coingecko.com/coins/images/10365/large/near.png" }
+    };
 
     async function updatePrices() {
-      const symbols = {
-        BTC: 'btc_thb',
-        ETH: 'eth_thb',
-        ZRC: 'zrc_thb'
-      };
+      const dashboard = document.getElementById('dashboard');
+      dashboard.innerHTML = '';
 
-      for (const [key, sym] of Object.entries(symbols)) {
+      const promises = Object.entries(coinList).map(async ([symbol, data]) => {
         try {
-          const data = await fetchSingleCoin(sym);
-          document.getElementById(`${key.toLowerCase()}-price`).textContent =
-            Number(data.last).toLocaleString('th-TH', { minimumFractionDigits: 2 }) + ' ฿';
-          const change = data.percentChange ?? 0;
-          const changeEl = document.getElementById(`${key.toLowerCase()}-change`);
-          changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
-          changeEl.className = 'change ' + (change >= 0 ? 'positive' : 'negative');
-        } catch (err) {
-          console.error(`Error fetching ${key}:`, err);
+          const res = await fetch(`https://api.bitkub.com/api/v3/market/ticker?sym=${symbol.toLowerCase()}_thb`);
+          const json = await res.json();
+          const coin = Object.values(json)[0];
+          const change = coin.percentChange ?? 0;
+          const changeClass = change >= 0 ? 'positive' : 'negative';
+
+          const card = `
+            <div class="card">
+              <img src="${data.logo}" alt="${symbol} Logo" class="logo">
+              <div class="coin-name">${data.name} (${symbol})</div>
+              <div class="price">${Number(coin.last).toLocaleString('th-TH', { minimumFractionDigits: 2 })} ฿</div>
+              <div class="change ${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div>
+            </div>
+          `;
+          dashboard.innerHTML += card;
+        } catch (e) {
+          console.error(`Error fetching ${symbol}:`, e);
         }
-      }
+      });
 
-      try {
-        const all = await fetch('https://api.bitkub.com/api/market/ticker').then(r => r.json());
-        const entries = Object.entries(all).filter(([k, v]) => k.endsWith('_THB') && v.percentChange !== undefined);
-
-        const topVol = entries.sort((a, b) => b[1].volume - a[1].volume).slice(0, 10);
-        const topGain = entries.sort((a, b) => b[1].percentChange - a[1].percentChange).slice(0, 10);
-
-        const getLogo = sym => `https://static.bitkub.com/images/coins/${sym.split('_')[0].toLowerCase()}.png`;
-
-        document.getElementById('top-volume').innerHTML = await Promise.all(topVol.map(async ([sym]) => {
-          const coin = await fetchSingleCoin(sym.toLowerCase());
-          return `<div class="list-item"><img src="${getLogo(sym)}"> ${sym} - ${Number(coin.volume).toLocaleString()}</div>`;
-        })).then(list => list.join(''));
-
-        document.getElementById('top-gainers').innerHTML = await Promise.all(topGain.map(async ([sym]) => {
-          const coin = await fetchSingleCoin(sym.toLowerCase());
-          return `<div class="list-item"><img src="${getLogo(sym)}"> ${sym} - ${coin.percentChange.toFixed(2)}%</div>`;
-        })).then(list => list.join(''));
-
-      } catch (err) {
-        console.error('Error loading side lists:', err);
-      }
+      await Promise.all(promises);
     }
 
     updatePrices();
