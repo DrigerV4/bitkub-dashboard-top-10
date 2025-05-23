@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bitkub Dashboard</title>
+  <title>Real-Time Crypto Prices</title>
   <style>
     body {
       margin: 0;
@@ -11,62 +11,85 @@
       background-size: cover;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
     }
 
     .bitkub-logo {
+      margin-top: 30px;
       height: 60px;
-      margin: 30px 0 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     header {
+      color: white;
       font-size: 2.5em;
+      margin-top: 10px;
       font-weight: bold;
       text-shadow: 0 0 10px #00b140;
       text-align: center;
     }
 
-    .content {
+    .container {
       display: flex;
       justify-content: space-between;
-      gap: 40px;
-      width: 100%;
-      max-width: 1400px;
-      margin-top: 40px;
-      flex-wrap: wrap;
+      padding: 40px;
+      gap: 20px;
     }
 
-    .column {
-      flex: 1;
-      min-width: 300px;
+    .sidebar {
+      width: 20%;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,255,120,0.2);
     }
 
     .dashboard {
+      flex-grow: 1;
       display: flex;
-      flex-direction: column;
-      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
     }
 
     .card {
       background: #1c1c1cdd;
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(0,255,120,0.2);
+      padding: 30px;
+      width: 280px;
       text-align: center;
-      box-shadow: 0 0 20px rgba(0,255,120,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 40px rgba(0,255,120,0.4);
+    }
+
+    .logo {
+      height: 60px;
+      margin-bottom: 15px;
     }
 
     .coin-name {
-      font-size: 1.2em;
+      font-size: 1.4em;
+      margin-bottom: 10px;
       font-weight: bold;
       color: #00b140;
     }
 
-    .price, .change, .volume {
-      margin-top: 5px;
-      font-size: 1em;
+    .price {
+      font-size: 2em;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .change {
+      font-size: 1.2em;
+      margin-top: 10px;
+      font-weight: 600;
     }
 
     .positive {
@@ -78,75 +101,116 @@
     }
 
     footer {
-      margin-top: 40px;
+      margin-top: 20px;
       text-align: center;
-      font-size: 0.9em;
       color: #ccc;
       background: rgba(0, 0, 0, 0.4);
-      padding: 10px;
-      border-radius: 10px;
-      width: 100%;
-      max-width: 1400px;
+      padding: 15px;
+      font-size: 0.9em;
+    }
+
+    .list-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #00b140;
+    }
+
+    .list-item {
+      margin-bottom: 8px;
     }
   </style>
 </head>
 <body>
-  <img src="bitkub-logo.png" class="bitkub-logo" alt="Bitkub Logo">
-  <header>Bitkub Real-Time Dashboard</header>
+  <img src="bitkub-logo.png" alt="Bitkub Exchange Logo" class="bitkub-logo">
+  <header>Real-Time Crypto Prices</header>
 
-  <div class="content">
-    <div class="column">
-      <h2>Top 10 Volume</h2>
-      <div id="top-volume" class="dashboard"></div>
+  <div class="container">
+    <!-- LEFT SIDEBAR: TOP VOLUME -->
+    <div class="sidebar">
+      <div class="list-title">Top 10 by Volume</div>
+      <div id="top-volume"></div>
     </div>
-    <div class="column">
-      <h2>Top 10 Gainers</h2>
-      <div id="top-gainers" class="dashboard"></div>
+
+    <!-- CENTER DASHBOARD -->
+    <div class="dashboard">
+      <div class="card">
+        <img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png" alt="BTC Logo" class="logo">
+        <div class="coin-name">Bitcoin (BTC)</div>
+        <div class="price" id="btc-price">Loading...</div>
+        <div class="change" id="btc-change">-</div>
+      </div>
+      <div class="card">
+        <img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png" alt="ETH Logo" class="logo">
+        <div class="coin-name">Ethereum (ETH)</div>
+        <div class="price" id="eth-price">Loading...</div>
+        <div class="change" id="eth-change">-</div>
+      </div>
+      <div class="card">
+        <img src="zrc-logo.png" alt="ZRC Logo (Zircuit)" class="logo">
+        <div class="coin-name">Zircuit (ZRC)</div>
+        <div class="price" id="zrc-price">Loading...</div>
+        <div class="change" id="zrc-change">-</div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR: TOP GAINERS -->
+    <div class="sidebar">
+      <div class="list-title">Top 10 Gainers</div>
+      <div id="top-gainers"></div>
     </div>
   </div>
 
   <footer>
-    <div>Cryptocurrency and digital tokens involve high risks; investors may lose all investment money and should study information carefully and make investments according to their own risk profile.</div>
-    <div>Powered by Bitkub API · Updates every 10 sec</div>
+    <div style="margin-bottom: 8px;">
+      Cryptocurrency and digital tokens involve high risks; investors may lose all investment money and should study information carefully and make investments according to their own risk profile.
+    </div>
+    Powered by Bitkub API · Updates every 10 sec
   </footer>
 
   <script>
-    async function fetchAndDisplay() {
+    async function updatePrices() {
       try {
-        const res = await fetch('https://corsproxy.io/?https://api.bitkub.com/api/market/ticker');
-        const data = await res.json();
+        const allRes = await fetch('https://api.bitkub.com/api/market/ticker');
+        const allData = await allRes.json();
 
-        const thbPairs = Object.entries(data).filter(([symbol]) => symbol.endsWith('_THB'))
-          .map(([symbol, info]) => ({
-            symbol,
-            last: info.last,
-            change: info.percentChange,
-            volume: info.volume
-          }));
-
-        const topVolume = [...thbPairs].sort((a, b) => b.volume - a.volume).slice(0, 10);
-        const topGainers = [...thbPairs].sort((a, b) => b.change - a.change).slice(0, 10);
-
-        const buildCard = ({ symbol, last, change, volume }) => {
-          const colorClass = change >= 0 ? 'positive' : 'negative';
-          return `
-            <div class="card">
-              <div class="coin-name">${symbol.replace('_THB', '')}</div>
-              <div class="price">${last.toLocaleString()} ฿</div>
-              <div class="change ${colorClass}">${change.toFixed(2)}%</div>
-              <div class="volume">Vol: ${volume.toLocaleString()}</div>
-            </div>`;
+        // Render BTC, ETH, ZRC
+        const coins = {
+          BTC: allData['BTC_THB'],
+          ETH: allData['ETH_THB'],
+          ZRC: allData['ZRC_THB']
         };
 
-        document.getElementById('top-volume').innerHTML = topVolume.map(buildCard).join('');
-        document.getElementById('top-gainers').innerHTML = topGainers.map(buildCard).join('');
-      } catch (err) {
-        console.error('Error fetching Bitkub data:', err);
+        for (const [key, val] of Object.entries(coins)) {
+          const priceEl = document.getElementById(`${key.toLowerCase()}-price`);
+          const changeEl = document.getElementById(`${key.toLowerCase()}-change`);
+          if (priceEl && changeEl) {
+            priceEl.textContent = Number(val.last).toLocaleString('th-TH', { minimumFractionDigits: 2 }) + ' ฿';
+            const change = val.percentChange ?? 0;
+            changeEl.textContent = (change >= 0 ? "+" : "") + change.toFixed(2) + "%";
+            changeEl.className = "change " + (change >= 0 ? "positive" : "negative");
+          }
+        }
+
+        // Sort and render top 10 volume
+        const entries = Object.entries(allData).filter(([sym]) => sym.endsWith("_THB"));
+        const withChange = entries.map(([sym, val]) => ({ sym, ...val }));
+
+        const topVolume = [...withChange].sort((a, b) => b.volume - a.volume).slice(0, 10);
+        const topGainers = [...withChange].sort((a, b) => b.percentChange - a.percentChange).slice(0, 10);
+
+        document.getElementById("top-volume").innerHTML =
+          topVolume.map(item => `<div class="list-item">${item.sym} - ${Number(item.volume).toLocaleString()}</div>`).join('');
+
+        document.getElementById("top-gainers").innerHTML =
+          topGainers.map(item => `<div class="list-item">${item.sym} - ${item.percentChange.toFixed(2)}%</div>`).join('');
+
+      } catch (e) {
+        console.error("Error fetching Bitkub data:", e);
       }
     }
 
-    fetchAndDisplay();
-    setInterval(fetchAndDisplay, 10000);
+    updatePrices();
+    setInterval(updatePrices, 10000);
   </script>
 </body>
 </html>
