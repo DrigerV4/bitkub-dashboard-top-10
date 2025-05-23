@@ -10,17 +10,17 @@
       background: url('bg.png') no-repeat center center fixed;
       background-size: cover;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      color: #fff;
     }
+
     .bitkub-logo {
       margin-top: 30px;
       height: 60px;
     }
+
     header {
       color: white;
       font-size: 2.5em;
@@ -29,74 +29,86 @@
       text-shadow: 0 0 10px #00b140;
       text-align: center;
     }
+
     .dashboard {
-      display: flex;
-      gap: 40px;
-      margin: 60px 20px 20px;
-      flex-wrap: wrap;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+      padding: 20px;
+      max-width: 1600px;
+      margin: 40px auto;
     }
+
     .card {
       background: #1c1c1cdd;
       border-radius: 20px;
-      box-shadow: 0 0 25px rgba(0,255,120,0.2);
-      padding: 30px;
-      width: 280px;
+      box-shadow: 0 0 20px rgba(0,255,120,0.2);
+      padding: 20px;
       text-align: center;
       transition: all 0.3s ease;
     }
+
     .card:hover {
       transform: scale(1.03);
-      box-shadow: 0 0 40px rgba(0,255,120,0.4);
+      box-shadow: 0 0 30px rgba(0,255,120,0.4);
     }
+
     .logo {
-      height: 60px;
-      margin-bottom: 15px;
-    }
-    .coin-name {
-      font-size: 1.4em;
+      height: 50px;
       margin-bottom: 10px;
+    }
+
+    .coin-name {
+      font-size: 1.1em;
       font-weight: bold;
       color: #00b140;
+      margin-bottom: 6px;
     }
+
     .price {
-      font-size: 2em;
+      font-size: 1.5em;
       font-weight: bold;
       color: #ffffff;
     }
+
     .change {
-      font-size: 1.2em;
-      margin-top: 10px;
+      font-size: 1em;
+      margin-top: 6px;
       font-weight: 600;
     }
+
     .positive {
       color: #00e676;
     }
+
     .negative {
       color: #ff5252;
     }
+
     footer {
-      position: fixed;
-      bottom: 10px;
-      width: 100%;
+      margin: 20px 0;
       text-align: center;
-      padding: 10px;
-      color: #888;
-      font-size: 0.9em;
+      color: #ccc;
       background: rgba(0, 0, 0, 0.4);
+      padding: 15px;
+      font-size: 0.9em;
+      width: 100%;
     }
   </style>
 </head>
 <body>
   <img src="bitkub-logo.png" alt="Bitkub Exchange Logo" class="bitkub-logo">
   <header>Real-Time Crypto Prices</header>
+
   <div class="dashboard" id="dashboard"></div>
+
   <footer>
     <div style="margin-bottom: 8px;">
       Cryptocurrency and digital tokens involve high risks; investors may lose all investment money and should study information carefully and make investments according to their own risk profile.
     </div>
     Powered by Bitkub API · Updates every 10 sec
   </footer>
+
   <script>
     const coinList = {
       BTC: { name: "Bitcoin", logo: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png" },
@@ -109,7 +121,7 @@
       DOGE: { name: "Dogecoin", logo: "https://assets.coingecko.com/coins/images/5/large/dogecoin.png" },
       SOL: { name: "Solana", logo: "https://assets.coingecko.com/coins/images/4128/large/Solana.jpg" },
       AVAX: { name: "Avalanche", logo: "https://assets.coingecko.com/coins/images/12559/large/coin-round-red.png" },
-      LTC: { name: "Litecoin", logo: "https://assets.coingecko.com/coins/images/2/large/litecoin.png" },
+      SUI: { name: "Sui", logo: "https://assets.coingecko.com/coins/images/27024/large/sui_logo.png" },
       MATIC: { name: "Polygon", logo: "https://assets.coingecko.com/coins/images/4713/large/matic-token-icon.png" },
       LINK: { name: "Chainlink", logo: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png" },
       ATOM: { name: "Cosmos", logo: "https://assets.coingecko.com/coins/images/1481/large/cosmos_hub.png" },
