@@ -116,22 +116,29 @@
     }
 
     .list-item {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .list-item img {
+      height: 24px;
+      margin-right: 10px;
+      border-radius: 50%;
     }
   </style>
 </head>
 <body>
   <img src="bitkub-logo.png" alt="Bitkub Exchange Logo" class="bitkub-logo">
+
   <header>Real-Time Crypto Prices</header>
 
   <div class="container">
-    <!-- LEFT SIDEBAR: TOP VOLUME -->
     <div class="sidebar">
       <div class="list-title">Top 10 by Volume</div>
       <div id="top-volume"></div>
     </div>
 
-    <!-- CENTER DASHBOARD -->
     <div class="dashboard">
       <div class="card">
         <img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png" alt="BTC Logo" class="logo">
@@ -153,7 +160,6 @@
       </div>
     </div>
 
-    <!-- RIGHT SIDEBAR: TOP GAINERS -->
     <div class="sidebar">
       <div class="list-title">Top 10 Gainers</div>
       <div id="top-gainers"></div>
@@ -170,39 +176,65 @@
   <script>
     async function updatePrices() {
       try {
-        const allRes = await fetch('https://api.bitkub.com/api/market/ticker');
-        const allData = await allRes.json();
-
-        // Render BTC, ETH, ZRC
-        const coins = {
-          BTC: allData['BTC_THB'],
-          ETH: allData['ETH_THB'],
-          ZRC: allData['ZRC_THB']
+        const symbols = {
+          BTC: "btc_thb",
+          ETH: "eth_thb",
+          ZRC: "zrc_thb"
         };
+
+        const responses = await Promise.all(
+          Object.values(symbols).map(sym =>
+            fetch(`https://api.bitkub.com/api/v3/market/ticker?sym=${sym}`)
+          )
+        );
+
+        const results = await Promise.all(responses.map(res => res.json()));
+        const coins = { BTC: null, ETH: null, ZRC: null };
+
+        for (const val of results) {
+          const symbol = val[0]?.symbol;
+          if (!symbol) continue;
+          if (symbol === "BTC_THB") coins.BTC = val[0];
+          if (symbol === "ETH_THB") coins.ETH = val[0];
+          if (symbol === "ZRC_THB") coins.ZRC = val[0];
+        }
 
         for (const [key, val] of Object.entries(coins)) {
           const priceEl = document.getElementById(`${key.toLowerCase()}-price`);
           const changeEl = document.getElementById(`${key.toLowerCase()}-change`);
-          if (priceEl && changeEl) {
-            priceEl.textContent = Number(val.last).toLocaleString('th-TH', { minimumFractionDigits: 2 }) + ' ฿';
+          if (priceEl && changeEl && val) {
+            priceEl.textContent = new Intl.NumberFormat('th-TH', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }).format(val.last) + ' ฿';
             const change = val.percentChange ?? 0;
             changeEl.textContent = (change >= 0 ? "+" : "") + change.toFixed(2) + "%";
             changeEl.className = "change " + (change >= 0 ? "positive" : "negative");
           }
         }
 
-        // Sort and render top 10 volume
-        const entries = Object.entries(allData).filter(([sym]) => sym.endsWith("_THB"));
-        const withChange = entries.map(([sym, val]) => ({ sym, ...val }));
+        const allRes = await fetch('https://api.bitkub.com/api/market/ticker');
+        const allData = await allRes.json();
+        const entries = Object.entries(allData).filter(([sym]) => sym.endsWith("_THB") && allData[sym].percentChange !== undefined);
+        const mapped = entries.map(([sym, val]) => ({ symbol: sym, ...val }));
 
-        const topVolume = [...withChange].sort((a, b) => b.volume - a.volume).slice(0, 10);
-        const topGainers = [...withChange].sort((a, b) => b.percentChange - a.percentChange).slice(0, 10);
+        const topVolume = [...mapped].sort((a, b) => b.volume - a.volume).slice(0, 10);
+        const topGainers = [...mapped].sort((a, b) => b.percentChange - a.percentChange).slice(0, 10);
+
+        const getLogo = sym => {
+          const coin = sym.split("_")[0].toLowerCase();
+          return `https://static.bitkub.com/images/coins/${coin}.png`;
+        };
 
         document.getElementById("top-volume").innerHTML =
-          topVolume.map(item => `<div class="list-item">${item.sym} - ${Number(item.volume).toLocaleString()}</div>`).join('');
+          topVolume.map(item =>
+            `<div class="list-item"><img src="${getLogo(item.symbol)}" alt=""> ${item.symbol} - ${Number(item.volume).toLocaleString()}</div>`
+          ).join('');
 
         document.getElementById("top-gainers").innerHTML =
-          topGainers.map(item => `<div class="list-item">${item.sym} - ${item.percentChange.toFixed(2)}%</div>`).join('');
+          topGainers.map(item =>
+            `<div class="list-item"><img src="${getLogo(item.symbol)}" alt=""> ${item.symbol} - ${item.percentChange.toFixed(2)}%</div>`
+          ).join('');
 
       } catch (e) {
         console.error("Error fetching Bitkub data:", e);
