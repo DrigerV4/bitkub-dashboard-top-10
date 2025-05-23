@@ -142,22 +142,22 @@
     Powered by Bitkub API · Updates every 10 sec
   </footer>
   <script>
-    async function fetchCoin(sym) {
+    async function fetchSingleCoin(sym) {
       const res = await fetch(`https://api.bitkub.com/api/v3/market/ticker?sym=${sym}`);
       const json = await res.json();
-      return json[0];
+      return Object.values(json)[0];
     }
 
     async function updatePrices() {
-      const coins = {
+      const symbols = {
         BTC: 'btc_thb',
         ETH: 'eth_thb',
         ZRC: 'zrc_thb'
       };
 
-      for (const [key, sym] of Object.entries(coins)) {
+      for (const [key, sym] of Object.entries(symbols)) {
         try {
-          const data = await fetchCoin(sym);
+          const data = await fetchSingleCoin(sym);
           document.getElementById(`${key.toLowerCase()}-price`).textContent =
             Number(data.last).toLocaleString('th-TH', { minimumFractionDigits: 2 }) + ' ฿';
           const change = data.percentChange ?? 0;
@@ -171,21 +171,25 @@
 
       try {
         const all = await fetch('https://api.bitkub.com/api/market/ticker').then(r => r.json());
-        const items = Object.entries(all).filter(([k, v]) => k.endsWith('_THB') && v.percentChange !== undefined);
+        const entries = Object.entries(all).filter(([k, v]) => k.endsWith('_THB') && v.percentChange !== undefined);
 
-        const sortedVol = [...items].sort((a, b) => b[1].volume - a[1].volume).slice(0, 10);
-        const sortedGain = [...items].sort((a, b) => b[1].percentChange - a[1].percentChange).slice(0, 10);
+        const topVol = entries.sort((a, b) => b[1].volume - a[1].volume).slice(0, 10);
+        const topGain = entries.sort((a, b) => b[1].percentChange - a[1].percentChange).slice(0, 10);
 
         const getLogo = sym => `https://static.bitkub.com/images/coins/${sym.split('_')[0].toLowerCase()}.png`;
 
-        document.getElementById('top-volume').innerHTML = sortedVol.map(([sym, v]) =>
-          `<div class="list-item"><img src="${getLogo(sym)}"> ${sym} - ${Number(v.volume).toLocaleString()}</div>`).join('');
+        document.getElementById('top-volume').innerHTML = await Promise.all(topVol.map(async ([sym]) => {
+          const coin = await fetchSingleCoin(sym.toLowerCase());
+          return `<div class="list-item"><img src="${getLogo(sym)}"> ${sym} - ${Number(coin.volume).toLocaleString()}</div>`;
+        })).then(list => list.join(''));
 
-        document.getElementById('top-gainers').innerHTML = sortedGain.map(([sym, v]) =>
-          `<div class="list-item"><img src="${getLogo(sym)}"> ${sym} - ${v.percentChange.toFixed(2)}%</div>`).join('');
+        document.getElementById('top-gainers').innerHTML = await Promise.all(topGain.map(async ([sym]) => {
+          const coin = await fetchSingleCoin(sym.toLowerCase());
+          return `<div class="list-item"><img src="${getLogo(sym)}"> ${sym} - ${coin.percentChange.toFixed(2)}%</div>`;
+        })).then(list => list.join(''));
 
       } catch (err) {
-        console.error('Error fetching top lists:', err);
+        console.error('Error loading side lists:', err);
       }
     }
 
