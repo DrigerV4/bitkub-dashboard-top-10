@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bitkub Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      background: url('bg.png') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .bitkub-logo {
+      height: 60px;
+      margin: 30px 0 10px;
+    }
+
+    header {
+      font-size: 2.5em;
+      font-weight: bold;
+      text-shadow: 0 0 10px #00b140;
+      text-align: center;
+    }
+
+    .content {
+      display: flex;
+      justify-content: space-between;
+      gap: 40px;
+      width: 100%;
+      max-width: 1400px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .column {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: #1c1c1cdd;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,255,120,0.2);
+    }
+
+    .coin-name {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #00b140;
+    }
+
+    .price, .change, .volume {
+      margin-top: 5px;
+      font-size: 1em;
+    }
+
+    .positive {
+      color: #00e676;
+    }
+
+    .negative {
+      color: #ff5252;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 0.9em;
+      color: #ccc;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 10px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 1400px;
+    }
+  </style>
+</head>
+<body>
+  <img src="bitkub-logo.png" class="bitkub-logo" alt="Bitkub Logo">
+  <header>Bitkub Real-Time Dashboard</header>
+
+  <div class="content">
+    <div class="column">
+      <h2>Top 10 Volume</h2>
+      <div id="top-volume" class="dashboard"></div>
+    </div>
+    <div class="column">
+      <h2>Top 10 Gainers</h2>
+      <div id="top-gainers" class="dashboard"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div>Cryptocurrency and digital tokens involve high risks; investors may lose all investment money and should study information carefully and make investments according to their own risk profile.</div>
+    <div>Powered by Bitkub API · Updates every 10 sec</div>
+  </footer>
+
+  <script>
+    async function fetchAndDisplay() {
+      try {
+        const res = await fetch('https://corsproxy.io/?https://api.bitkub.com/api/market/ticker');
+        const data = await res.json();
+
+        const thbPairs = Object.entries(data).filter(([symbol]) => symbol.endsWith('_THB'))
+          .map(([symbol, info]) => ({
+            symbol,
+            last: info.last,
+            change: info.percentChange,
+            volume: info.volume
+          }));
+
+        const topVolume = [...thbPairs].sort((a, b) => b.volume - a.volume).slice(0, 10);
+        const topGainers = [...thbPairs].sort((a, b) => b.change - a.change).slice(0, 10);
+
+        const buildCard = ({ symbol, last, change, volume }) => {
+          const colorClass = change >= 0 ? 'positive' : 'negative';
+          return `
+            <div class="card">
+              <div class="coin-name">${symbol.replace('_THB', '')}</div>
+              <div class="price">${last.toLocaleString()} ฿</div>
+              <div class="change ${colorClass}">${change.toFixed(2)}%</div>
+              <div class="volume">Vol: ${volume.toLocaleString()}</div>
+            </div>`;
+        };
+
+        document.getElementById('top-volume').innerHTML = topVolume.map(buildCard).join('');
+        document.getElementById('top-gainers').innerHTML = topGainers.map(buildCard).join('');
+      } catch (err) {
+        console.error('Error fetching Bitkub data:', err);
+      }
+    }
+
+    fetchAndDisplay();
+    setInterval(fetchAndDisplay, 10000);
+  </script>
+</body>
+</html>
