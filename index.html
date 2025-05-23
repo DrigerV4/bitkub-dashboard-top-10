@@ -112,59 +112,91 @@
   </footer>
 
   <script>
-    const coinList = {
-      BTC: { name: "Bitcoin", logo: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png" },
-      ETH: { name: "Ethereum", logo: "https://assets.coingecko.com/coins/images/279/large/ethereum.png" },
-      ZRC: { name: "Zircuit", logo: "zrc-logo.png" },
-      USDT: { name: "Tether", logo: "https://assets.coingecko.com/coins/images/325/large/Tether-logo.png" },
-      BNB: { name: "BNB", logo: "https://cryptologos.cc/logos/binance-coin-bnb-logo.svg" },
-      XRP: { name: "XRP", logo: "https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png" },
-      ADA: { name: "Cardano", logo: "https://assets.coingecko.com/coins/images/975/large/cardano.png" },
-      DOGE: { name: "Dogecoin", logo: "https://assets.coingecko.com/coins/images/5/large/dogecoin.png" },
-      SOL: { name: "Solana", logo: "https://assets.coingecko.com/coins/images/4128/large/Solana.jpg" },
-      AVAX: { name: "Avalanche", logo: "https://assets.coingecko.com/coins/images/12559/large/coin-round-red.png" },
-      SUI: { name: "Sui", logo: "https://assets.coingecko.com/coins/images/27024/large/sui_logo.png" },
-      MATIC: { name: "Polygon", logo: "https://assets.coingecko.com/coins/images/4713/large/matic-token-icon.png" },
-      LINK: { name: "Chainlink", logo: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png" },
-      ATOM: { name: "Cosmos", logo: "https://assets.coingecko.com/coins/images/1481/large/cosmos_hub.png" },
-      XLM: { name: "Stellar", logo: "https://assets.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png" },
-      DOT: { name: "Polkadot", logo: "https://assets.coingecko.com/coins/images/12171/large/polkadot.png" },
-      AAVE: { name: "Aave", logo: "https://assets.coingecko.com/coins/images/12645/large/AAVE.png" },
-      UNI: { name: "Uniswap", logo: "https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png" },
-      TRX: { name: "TRON", logo: "https://assets.coingecko.com/coins/images/1094/large/tron-logo.png" },
-      NEAR: { name: "Near", logo: "https://assets.coingecko.com/coins/images/10365/large/near.png" }
-    };
-
     async function updatePrices() {
       const dashboard = document.getElementById('dashboard');
       dashboard.innerHTML = '';
 
-      const orderedSymbols = Object.keys(coinList);
+      const coinOrder = [
+        "BTC", "ETH", "USDT", "BNB", "XRP", "ADA", "DOGE", "SOL", "AVAX",
+        "SUI", "MATIC", "LINK", "ATOM", "XLM", "DOT", "AAVE", "UNI", "TRX", "NEAR", "ZRC"
+      ];
 
-      const promises = orderedSymbols.map(async (symbol) => {
-        const data = coinList[symbol];
-        try {
-          const res = await fetch(`https://api.bitkub.com/api/v3/market/ticker?sym=${symbol.toLowerCase()}_thb`);
-          const json = await res.json();
-          const coin = Object.values(json)[0];
-          const change = coin.percentChange ?? 0;
-          const changeClass = change >= 0 ? 'positive' : 'negative';
+      const symbols = {
+        BTC: "btc_thb",
+        ETH: "eth_thb",
+        USDT: "usdt_thb",
+        BNB: "bnb_thb",
+        XRP: "xrp_thb",
+        ADA: "ada_thb",
+        DOGE: "doge_thb",
+        SOL: "sol_thb",
+        AVAX: "avax_thb",
+        SUI: "sui_thb",
+        MATIC: "matic_thb",
+        LINK: "link_thb",
+        ATOM: "atom_thb",
+        XLM: "xlm_thb",
+        DOT: "dot_thb",
+        AAVE: "aave_thb",
+        UNI: "uni_thb",
+        TRX: "trx_thb",
+        NEAR: "near_thb",
+        ZRC: "zrc_thb"
+      };
 
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <img src="${data.logo}" alt="${symbol} Logo" class="logo">
-            <div class="coin-name">${data.name} (${symbol})</div>
-            <div class="price">${Number(coin.last).toLocaleString('th-TH', { minimumFractionDigits: 2 })} ฿</div>
-            <div class="change ${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div>
-          `;
-          dashboard.appendChild(card);
-        } catch (e) {
-          console.error(`Error fetching ${symbol}:`, e);
-        }
+      const coinList = {
+        BTC: { name: "Bitcoin", logo: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png" },
+        ETH: { name: "Ethereum", logo: "https://assets.coingecko.com/coins/images/279/large/ethereum.png" },
+        USDT: { name: "Tether", logo: "https://assets.coingecko.com/coins/images/325/large/Tether-logo.png" },
+        BNB: { name: "BNB", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png" },
+        XRP: { name: "XRP", logo: "https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png" },
+        ADA: { name: "Cardano", logo: "https://assets.coingecko.com/coins/images/975/large/cardano.png" },
+        DOGE: { name: "Dogecoin", logo: "https://assets.coingecko.com/coins/images/5/large/dogecoin.png" },
+        SOL: { name: "Solana", logo: "https://assets.coingecko.com/coins/images/4128/large/solana.png" },
+        AVAX: { name: "Avalanche", logo: "https://assets.coingecko.com/coins/images/12559/large/coin-round-red.png" },
+        SUI: { name: "Sui", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/25080.png" },
+        MATIC: { name: "Polygon", logo: "https://assets.coingecko.com/coins/images/4713/large/matic-token-icon.png" },
+        LINK: { name: "Chainlink", logo: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png" },
+        ATOM: { name: "Cosmos", logo: "https://assets.coingecko.com/coins/images/1481/large/cosmos_hub.png" },
+        XLM: { name: "Stellar", logo: "https://assets.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png" },
+        DOT: { name: "Polkadot", logo: "https://assets.coingecko.com/coins/images/12171/large/polkadot.png" },
+        AAVE: { name: "Aave", logo: "https://assets.coingecko.com/coins/images/12645/large/AAVE.png" },
+        UNI: { name: "Uniswap", logo: "https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png" },
+        TRX: { name: "TRON", logo: "https://assets.coingecko.com/coins/images/1094/large/tron-logo.png" },
+        NEAR: { name: "Near", logo: "https://assets.coingecko.com/coins/images/10365/large/near.png" },
+        ZRC: { name: "Zircuit", logo: "zrc-logo.png" }
+      };
+
+      const responses = await Promise.all(
+        coinOrder.map(key => fetch(`https://api.bitkub.com/api/v3/market/ticker?sym=${symbols[key]}`))
+      );
+
+      const results = await Promise.all(responses.map(res => res.json()));
+      const dataMap = {};
+      results.forEach(obj => {
+        const key = Object.keys(obj)[0];
+        const val = obj[key];
+        const code = val.symbol.split('_')[0].toUpperCase();
+        dataMap[code] = val;
       });
 
-      await Promise.all(promises);
+      coinOrder.forEach(symbol => {
+        const val = dataMap[symbol];
+        const info = coinList[symbol];
+        if (!val || !info) return;
+        const change = val.percent_change ?? 0;
+        const changeClass = change >= 0 ? 'positive' : 'negative';
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${info.logo}" alt="${symbol} Logo" class="logo">
+          <div class="coin-name">${info.name} (${symbol})</div>
+          <div class="price">${Number(val.last).toLocaleString('th-TH', { minimumFractionDigits: 2 })} ฿</div>
+          <div class="change ${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div>
+        `;
+        dashboard.appendChild(card);
+      });
     }
 
     updatePrices();
