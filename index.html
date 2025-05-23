@@ -118,26 +118,11 @@
     ];
 
     const symbols = {
-      BTC: "btc_thb",
-      ETH: "eth_thb",
-      USDT: "usdt_thb",
-      BNB: "bnb_thb",
-      XRP: "xrp_thb",
-      ADA: "ada_thb",
-      DOGE: "doge_thb",
-      SOL: "sol_thb",
-      AVAX: "avax_thb",
-      SUI: "sui_thb",
-      MATIC: "matic_thb",
-      LINK: "link_thb",
-      ATOM: "atom_thb",
-      XLM: "xlm_thb",
-      DOT: "dot_thb",
-      AAVE: "aave_thb",
-      UNI: "uni_thb",
-      TRX: "trx_thb",
-      NEAR: "near_thb",
-      ZRC: "zrc_thb"
+      BTC: "btc_thb", ETH: "eth_thb", USDT: "usdt_thb", BNB: "bnb_thb",
+      XRP: "xrp_thb", ADA: "ada_thb", DOGE: "doge_thb", SOL: "sol_thb",
+      AVAX: "avax_thb", SUI: "sui_thb", MATIC: "matic_thb", LINK: "link_thb",
+      ATOM: "atom_thb", XLM: "xlm_thb", DOT: "dot_thb", AAVE: "aave_thb",
+      UNI: "uni_thb", TRX: "trx_thb", NEAR: "near_thb", ZRC: "zrc_thb"
     };
 
     const coinList = {
@@ -155,4 +140,49 @@
       LINK: { name: "Chainlink", logo: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png" },
       ATOM: { name: "Cosmos", logo: "https://assets.coingecko.com/coins/images/1481/large/cosmos_hub.png" },
       XLM: { name: "Stellar", logo: "https://assets.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png" },
-      DOT: { name: "Polkadot", logo: "https://assets.coingecko.com/coins/images/12171/large/polkadot.p
+      DOT: { name: "Polkadot", logo: "https://assets.coingecko.com/coins/images/12171/large/polkadot.png" },
+      AAVE: { name: "Aave", logo: "https://assets.coingecko.com/coins/images/12645/large/AAVE.png" },
+      UNI: { name: "Uniswap", logo: "https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png" },
+      TRX: { name: "TRON", logo: "https://assets.coingecko.com/coins/images/1094/large/tron-logo.png" },
+      NEAR: { name: "Near", logo: "https://assets.coingecko.com/coins/images/10365/large/near.png" },
+      ZRC: { name: "Zircuit", logo: "zrc-logo.png" }
+    };
+
+    async function updatePrices() {
+      const dashboard = document.getElementById('dashboard');
+      dashboard.innerHTML = '';
+
+      const promises = coinOrder.map(async (symbol) => {
+        const sym = symbols[symbol];
+        const info = coinList[symbol];
+
+        try {
+          const res = await fetch(`https://api.bitkub.com/api/v3/market/ticker?sym=${sym}`);
+          const json = await res.json();
+          const coin = json[sym];
+
+          const change = coin.percent_change ?? 0;
+          const changeClass = change >= 0 ? 'positive' : 'negative';
+
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${info.logo}" alt="${symbol} Logo" class="logo">
+            <div class="coin-name">${info.name} (${symbol})</div>
+            <div class="price">${Number(coin.last).toLocaleString('th-TH', { minimumFractionDigits: 2 })} ฿</div>
+            <div class="change ${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div>
+          `;
+          dashboard.appendChild(card);
+        } catch (e) {
+          console.error(`Failed to load ${symbol}:`, e);
+        }
+      });
+
+      await Promise.all(promises);
+    }
+
+    updatePrices();
+    setInterval(updatePrices, 10000);
+  </script>
+</body>
+</html>
